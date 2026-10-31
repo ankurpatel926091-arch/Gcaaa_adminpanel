@@ -9,6 +9,7 @@ import ElectionNominations from '../Pages/ElectionNominations'
 import Events from '../Pages/Events'
 import Gallery from '../Pages/Gallery'
 import Publications from '../Pages/Publications'
+import PublicationFormPage from '../Pages/PublicationFormPage'
 import Blogs from '../Pages/Blogs'
 import BlogDetails from '../Pages/BlogDetails'
 import Profile from '../Pages/Profile'
@@ -57,6 +58,9 @@ const MainRoute = () => {
         <Route path="/events" element={<Events />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/publications" element={<Publications />} />
+        <Route path="/publications/add" element={<PublicationFormPage />} />
+        <Route path="/publications/create" element={<PublicationFormPage />} />
+        <Route path="/publications/edit/:id" element={<PublicationFormPage />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetails />} />
         <Route path="/contact-page" element={<ContactPageSettings />} />

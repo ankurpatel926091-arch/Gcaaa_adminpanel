@@ -1,38 +1,38 @@
-import React from 'react'
-import { BookOpen, FileText, Download, Award } from 'lucide-react'
+import React from 'react';
+import { BookOpen, FileText, Calendar, Layers } from 'lucide-react';
 
-const PublicationStats = ({ totalCount, journalCount }) => {
-  const stats = [
+const PublicationStats = ({ stats = {} }) => {
+  const statItems = [
     {
       label: 'Total Publications',
-      value: totalCount || 96,
+      value: stats.totalPublications !== undefined ? stats.totalPublications : 3,
       icon: BookOpen,
       bg: 'bg-[#800018]',
     },
     {
-      label: 'Peer-Reviewed Journals',
-      value: journalCount || 34,
-      icon: Award,
+      label: 'Documented Pages',
+      value: stats.totalDocumentedPages !== undefined ? stats.totalDocumentedPages : 446,
+      icon: FileText,
       bg: 'bg-[#800018]',
     },
     {
-      label: 'Annual Magazines',
-      value: '22',
-      icon: FileText,
+      label: 'Year Span',
+      value: stats.yearRange || '2013 – 2025',
+      icon: Calendar,
       bg: 'bg-emerald-700',
     },
     {
-      label: 'Total PDF Downloads',
-      value: '14.2k',
-      icon: Download,
+      label: 'Active Editions',
+      value: stats.publishedCount !== undefined ? `${stats.publishedCount} Published` : '3 Published',
+      icon: Layers,
       bg: 'bg-[#5c0011]',
     },
-  ]
+  ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((s) => {
-        const Icon = s.icon
+      {statItems.map((s) => {
+        const Icon = s.icon;
         return (
           <div
             key={s.label}
@@ -54,10 +54,10 @@ const PublicationStats = ({ totalCount, journalCount }) => {
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default PublicationStats
+export default PublicationStats;
