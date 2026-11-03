@@ -26,8 +26,8 @@ export const menuItems = [
   { name: 'Contact Messages', path: '/contact-messages', icon: Inbox },
   { name: 'Election Withdrawals', path: '/withdrawals', icon: FileSignature },
   // { name: 'Events', path: '/events', icon: CalendarDays },
-  // { name: 'Gallery', path: '/gallery', icon: Image },
-  // { name: 'Publications', path: '/publications', icon: BookOpen },
+  { name: 'Gallery', path: '/gallery', icon: Image },
+  { name: 'Publications', path: '/publications', icon: BookOpen },
 ]
 
 const Sidebar = ({ isOpen, setIsOpen }) => {

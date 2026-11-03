@@ -1,5 +1,5 @@
-import React from 'react'
-import { Search, Upload, Filter } from 'lucide-react'
+import React from 'react';
+import { Search, Upload } from 'lucide-react';
 
 const GalleryFilters = ({
   searchQuery,
@@ -9,13 +9,10 @@ const GalleryFilters = ({
   onOpenUpload,
 }) => {
   const albums = [
-    'All Albums',
-    'Annual Alumni Meet',
-    'Campus Architecture',
-    'Design Exhibition',
-    'Convocation Day',
-    'Faculty & Founders',
-  ]
+    'All Photos',
+    'GBM 2025',
+    'Dharohar & Reunions',
+  ];
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-xs lg:flex-row lg:items-center lg:justify-between">
@@ -37,7 +34,7 @@ const GalleryFilters = ({
         <select
           value={selectedAlbum}
           onChange={(e) => setSelectedAlbum(e.target.value)}
-          className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-700 outline-none focus:border-[#800018]"
+          className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-700 outline-none focus:border-[#800018] cursor-pointer"
         >
           {albums.map((a) => (
             <option key={a} value={a}>
@@ -49,14 +46,14 @@ const GalleryFilters = ({
         <button
           type="button"
           onClick={onOpenUpload}
-          className="flex items-center gap-2 rounded-xl bg-[#800018] px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#800018]/15 transition hover:bg-[#a00020] active:scale-95"
+          className="flex items-center gap-2 rounded-xl bg-[#800018] px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#800018]/15 transition hover:bg-[#a00020] active:scale-95 cursor-pointer"
         >
           <Upload size={16} />
           Upload Photos
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default GalleryFilters
+export default GalleryFilters;

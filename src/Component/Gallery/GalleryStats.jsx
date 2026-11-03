@@ -1,38 +1,38 @@
-import React from 'react'
-import { Image, Layers, Sparkles, FolderArchive } from 'lucide-react'
+import React from 'react';
+import { Image, Layers, Sparkles, FolderArchive } from 'lucide-react';
 
-const GalleryStats = ({ totalPhotos, albumCount }) => {
-  const stats = [
+const GalleryStats = ({ stats = {}, isLoading = false }) => {
+  const cards = [
     {
       label: 'Archived Photos',
-      value: totalPhotos || 1240,
+      value: typeof stats.totalPhotos === 'number' ? stats.totalPhotos : 99,
       icon: Image,
       color: 'bg-[#800018]',
     },
     {
       label: 'Photo Albums',
-      value: albumCount || 14,
+      value: typeof stats.albumCount === 'number' ? `${stats.albumCount} Albums` : '2 Albums',
       icon: Layers,
       color: 'bg-[#800018] text-white',
     },
     {
-      label: 'Featured Highlights',
-      value: '38',
+      label: 'GBM 2025 Photos',
+      value: typeof stats.gbmCount === 'number' ? stats.gbmCount : 72,
       icon: Sparkles,
       color: 'bg-red-600',
     },
     {
-      label: 'Historical Archives',
-      value: '1975-2026',
+      label: 'Dharohar & Reunions',
+      value: typeof stats.dharoharCount === 'number' ? stats.dharoharCount : 27,
       icon: FolderArchive,
       color: 'bg-[#5c0011]',
     },
-  ]
+  ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((s) => {
-        const Icon = s.icon
+      {cards.map((s) => {
+        const Icon = s.icon;
         return (
           <div
             key={s.label}
@@ -54,10 +54,10 @@ const GalleryStats = ({ totalPhotos, albumCount }) => {
               </div>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default GalleryStats
+export default GalleryStats;

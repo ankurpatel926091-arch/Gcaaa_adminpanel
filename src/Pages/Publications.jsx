@@ -1,170 +1,182 @@
-import React, { useState } from 'react'
-import PublicationStats from '../Component/Publications/PublicationStats'
-import PublicationFilters from '../Component/Publications/PublicationFilters'
-import PublicationList from '../Component/Publications/PublicationList'
-import PublicationModal from '../Component/Publications/PublicationModal'
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import PublicationStats from '../Component/Publications/PublicationStats';
+import PublicationFilters from '../Component/Publications/PublicationFilters';
+import PublicationList from '../Component/Publications/PublicationList';
+import PublicationDetailModal from '../Component/Publications/PublicationDetailModal';
+import {
+  fetchAdminPublications,
+  deletePublication,
+} from '../Api/publicationAdminApi';
 
-const initialPublications = [
-  {
-    id: 1,
-    title: 'Vernacular Architecture & Climate Resilient Envelopes',
-    category: 'Research Journal',
-    edition: 'Vol. 15, Issue 1 (2026)',
-    author: 'Dr. Sameer Srivastava & GCAAA Research Cell',
-    publishDate: 'Feb 2026',
-    fileSize: '4.6 MB',
-    description:
-      'Empirical investigation on traditional passive cooling strategies in Awadh architectural monuments and modern application in institutional campuses.',
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
   },
-  {
-    id: 2,
-    title: 'GCA Annual Alumni Chronicle 2025: Golden Impressions',
-    category: 'Annual Magazine',
-    edition: 'Yearly Edition 2025',
-    author: 'GCAAA Editorial Committee',
-    publishDate: 'Dec 2025',
-    fileSize: '18.4 MB',
-    description:
-      'Compendium of alumni milestones, architectural firm profiles, award-winning building designs, and convocation retrospectives.',
-  },
-  {
-    id: 3,
-    title: 'Urban Heritage Conservation Guidelines for Historic Lucknow',
-    category: 'Research Journal',
-    edition: 'Special Monograph Series 4',
-    author: 'Ar. Rajesh Verma & Prof. K.P. Saxena',
-    publishDate: 'Nov 2025',
-    fileSize: '8.2 MB',
-    description:
-      'Policy recommendations for revitalizing historic city centers while balancing commercial real-estate demands.',
-  },
-  {
-    id: 4,
-    title: 'GCAAA Quarterly Newsletter - Winter 2025',
-    category: 'Newsletter',
-    edition: 'Issue 48',
-    author: 'Executive Secretariat',
-    publishDate: 'Jan 2026',
-    fileSize: '2.1 MB',
-    description:
-      'Updates on upcoming batch reunions, scholarship grants for underprivileged students, and alumni sports meets.',
-  },
-  {
-    id: 5,
-    title: 'Advances in Parametric Facade Optimization',
-    category: 'Conference Proceedings',
-    edition: 'Symposium 2025',
-    author: 'Dept. of Computational Architecture',
-    publishDate: 'Oct 2025',
-    fileSize: '6.7 MB',
-    description:
-      'Selected peer-reviewed papers presented at the International Symposium on Digital Fabrication & Envelope Performance.',
-  },
-]
+});
 
 const Publications = () => {
-  const [publications, setPublications] = useState(initialPublications)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('All Categories')
+  const navigate = useNavigate();
+  const [publications, setPublications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingPub, setEditingPub] = useState(null)
+  const [viewingPub, setViewingPub] = useState(null);
+
+  const [stats, setStats] = useState({
+    totalPublications: 3,
+    totalDocumentedPages: 446,
+    yearRange: '2013 – 2025',
+    publishedCount: 3,
+  });
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load publications from backend
+  const loadPublications = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const params = {};
+      if (debouncedSearch && debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
+      }
+
+      const res = await fetchAdminPublications(params);
+      if (res && res.success) {
+        setPublications(res.data || []);
+        if (res.stats) {
+          setStats(res.stats);
+        }
+      } else {
+        throw new Error(res?.message || 'Failed to fetch publications');
+      }
+    } catch (err) {
+      console.error('Error loading publications:', err);
+      setError(err.friendlyMessage || err.message || 'Failed to load publications.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    loadPublications();
+  }, [loadPublications]);
 
   const handleOpenAdd = () => {
-    setEditingPub(null)
-    setModalOpen(true)
-  }
+    navigate('/publications/add');
+  };
 
   const handleEdit = (pub) => {
-    setEditingPub(pub)
-    setModalOpen(true)
-  }
+    const pubId = pub.id || pub._id;
+    navigate(`/publications/edit/${pubId}`);
+  };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to remove this publication?')) {
-      setPublications((prev) => prev.filter((p) => p.id !== id))
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Delete Publication?',
+      text: 'Are you sure you want to permanently delete this publication edition?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#800018',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl',
+      },
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDeletingId(id);
+    try {
+      await deletePublication(id);
+      Toast.fire({
+        icon: 'success',
+        title: 'Publication deleted successfully.',
+      });
+      loadPublications();
+    } catch (err) {
+      Toast.fire({
+        icon: 'error',
+        title: err.friendlyMessage || err.message || 'Failed to delete publication.',
+      });
+    } finally {
+      setDeletingId(null);
     }
-  }
-
-  const handleDownload = (pub) => {
-    alert(`Downloading ${pub.title} (${pub.fileSize})...`)
-  }
-
-  const handleSave = (data) => {
-    if (editingPub) {
-      setPublications((prev) =>
-        prev.map((p) => (p.id === editingPub.id ? { ...data, id: editingPub.id } : p))
-      )
-    } else {
-      const newPub = {
-        ...data,
-        id: Date.now(),
-      }
-      setPublications([newPub, ...publications])
-    }
-  }
-
-  const filteredPublications = publications.filter((p) => {
-    const matchesSearch =
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase())
-
-    const matchesCategory =
-      selectedCategory === 'All Categories' || p.category === selectedCategory
-
-    return matchesSearch && matchesCategory
-  })
-
-  const journalCount = publications.filter((p) => p.category === 'Research Journal').length
+  };
 
   return (
     <div className="space-y-6">
       {/* Page Title */}
       <div>
         <span className="text-xs font-semibold uppercase tracking-wider text-[#800018]">
-          Scholarly & Association Press
+          Scholarly &amp; Association Press
         </span>
         <h1 className="font-serif text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-          Publications & Journals
+          Publications &amp; Journals
         </h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Catalog of architectural journals, research papers, newsletters, and annual magazines.
+          Catalog of official souvenirs, directories, architectural journals, and milestone editions.
         </p>
       </div>
 
-      {/* KPI Stats */}
-      <PublicationStats
-        totalCount={publications.length}
-        journalCount={journalCount}
-      />
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700">
+          {error}
+        </div>
+      )}
 
-      {/* Filters */}
+      {/* KPI Stats */}
+      <PublicationStats stats={stats} />
+
+      {/* Filters & Actions */}
       <PublicationFilters
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
         onOpenAddModal={handleOpenAdd}
       />
 
-      {/* List */}
+      {/* Publication List */}
       <PublicationList
-        publications={filteredPublications}
+        publications={publications}
+        onView={(pub) => setViewingPub(pub)}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onDownload={handleDownload}
+        isLoading={isLoading}
+        deletingId={deletingId}
       />
 
-      {/* Modal */}
-      <PublicationModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={handleSave}
-        editingPub={editingPub}
+      {/* Publication Detail View Modal */}
+      <PublicationDetailModal
+        isOpen={Boolean(viewingPub)}
+        onClose={() => setViewingPub(null)}
+        publication={viewingPub}
+        onEdit={(pub) => {
+          setViewingPub(null);
+          handleEdit(pub);
+        }}
       />
     </div>
-  )
-}
+  );
+};
 
-export default Publications
+export default Publications;
