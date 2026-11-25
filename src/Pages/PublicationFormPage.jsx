@@ -38,7 +38,7 @@ const PublicationFormPage = () => {
     tagline: '',
     edition: '2026 Edition',
     sectionNumber: '04',
-    year: '2026',
+    year: 2026,
     publisher: 'Alumni Association, Government College of Architecture Lucknow (GCAAA)',
     description: '',
     highlightsText: '',
@@ -404,7 +404,7 @@ const PublicationFormPage = () => {
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">Year</label>
                   <input
-                    type="text"
+                    type="number"
                     value={formData.year}
                     onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                     placeholder="2026"
